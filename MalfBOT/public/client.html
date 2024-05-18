@@ -15,16 +15,38 @@
         </ul>
     </nav>
     <h1>Добавить клиента</h1>
-    <form action="/client" method="post" onsubmit="showAlert()">
+    <form action="/appointment" method="post" onsubmit="showAlert()">
         <label for="full_name">ФИО</label>
         <input type="text" id="full_name" name="full_name" required><br>
         <label for="phone">Телефон</label>
         <input type="text" id="phone" name="phone" required><br>
         <label for="feature">Особенности</label>
         <textarea id="feature" name="feature" required></textarea><br>
+        <label for="master_id">Мастер</label>
+        <select id="master_id" name="master_id" required>
+            <!-- Заполняется динамически через JS -->
+        </select><br>
+        <label for="date">Дата</label>
+        <input type="date" id="date" name="date" required><br>
+        <label for="time">Время</label>
+        <input type="time" id="time" name="time" required><br>
         <button type="submit">Добавить</button>
     </form>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/masters')
+                .then(response => response.json())
+                .then(data => {
+                    const masterSelect = document.getElementById('master_id');
+                    data.forEach(master => {
+                        const option = document.createElement('option');
+                        option.value = master.id;
+                        option.textContent = master.full_name;
+                        masterSelect.appendChild(option);
+                    });
+                });
+        });
+
         const showAlert = () => {
             alert("Клиент успешно добавлен!");
         };
