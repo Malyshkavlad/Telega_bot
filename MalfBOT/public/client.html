@@ -3,31 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <title>Добавить клиента</title>
 </head>
 <body>
-    <nav>
-        <ul>
-            <li><a href="/">Главная</a></li>
-            <li><a href="/client">Клиенты</a></li>
-            <li><a href="/master">Сотрудники</a></li>
-            <li><a href="/service">Услуги</a></li>
-        </ul>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">Панель администратора</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/">Главная</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="/client">Клиенты <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/master">Сотрудники</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/service">Услуги</a>
+            </li>
+            </ul>
+        </div>
     </nav>
-    <h1>Добавить клиента</h1>
-    <form action="/client" method="post" onsubmit="showAlert()">
-        <label for="full_name">ФИО</label>
-        <input type="text" id="full_name" name="full_name" required><br>
-        <label for="phone">Телефон</label>
-        <input type="text" id="phone" name="phone" required><br>
-        <label for="feature">Особенности</label>
-        <textarea id="feature" name="feature" required></textarea><br>
-        <button type="submit">Добавить</button>
-    </form>
+    <div class="container">
+        <h1>Добавить клиента</h1>
+        <form action="/appointment" method="post" onsubmit="showAlert()">
+            <label for="full_name">ФИО</label>
+            <input type="text" id="full_name" name="full_name" required><br>
+            <label for="phone">Телефон</label>
+            <input type="text" id="phone" name="phone" required><br>
+            <label for="feature">Особенности</label>
+            <textarea id="feature" name="feature" required></textarea><br>
+            <label for="master_id">Мастер</label>
+            <select id="master_id" name="master_id" required>
+                <!-- Заполняется динамически через JS -->
+            </select><br>
+            <label for="date">Дата</label>
+            <input type="date" id="date" name="date" required><br>
+            <label for="time">Время</label>
+            <select id="time" name="time" required>
+                <!-- Options will be dynamically generated -->
+            </select><br>
+            <button type="submit">Добавить</button>
+        </form>
+    </div>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/masters')
+                .then(response => response.json())
+                .then(data => {
+                    const masterSelect = document.getElementById('master_id');
+                    data.forEach(master => {
+                        const option = document.createElement('option');
+                        option.value = master.id;
+                        option.textContent = master.full_name;
+                        masterSelect.appendChild(option);
+                    });
+                });
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            const masterSelect = document.getElementById('master_id');
+            const timeSelect = document.getElementById('time');
+            const dateInput = document.getElementById('date');
+
+            // Function to fetch the master's schedule for the selected date
+            const fetchMasterSchedule = () => {
+                const masterId = masterSelect.value;
+                const date = dateInput.value;
+
+                fetch(`/schedule/${masterId}/${date}`)
+                    .then(response => response.json())
+                    .then(schedule => {
+                        // Clear existing options
+                        timeSelect.innerHTML = '';
+
+                        const startTime = 10; // Start hour (10:00 AM)
+                        const endTime = 18; // End hour (6:00 PM)
+
+                        for (let hour = startTime; hour <= endTime; hour++) {
+                            for (let minute = 0; minute < 60; minute += 30) {
+                                const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                                
+                                // Check if the time slot is available
+                                const isAvailable = !schedule.some(appointment => appointment.time === time);
+                                
+                                if (isAvailable) {
+                                    const option = document.createElement('option');
+                                    option.value = time;
+                                    option.textContent = time;
+                                    timeSelect.appendChild(option);
+                                }
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error fetching schedule:', error));
+            };
+
+            // Event listeners for master and date selection
+            masterSelect.addEventListener('change', fetchMasterSchedule);
+            dateInput.addEventListener('change', fetchMasterSchedule);
+
+            // Fetch master list on page load
+            fetch('/api/masters')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(master => {
+                        const option = document.createElement('option');
+                        option.value = master.id;
+                        option.textContent = master.full_name;
+                        masterSelect.appendChild(option);
+                    });
+                    // Fetch initial schedule for the first master and current date
+                    fetchMasterSchedule();
+                })
+                .catch(error => console.error('Error fetching masters:', error));
+        });
         const showAlert = () => {
             alert("Клиент успешно добавлен!");
         };
     </script>
+<!--BOOTSTRAP СКРИПТАРА, ТЫЫТЫМА :D-->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 </html>
