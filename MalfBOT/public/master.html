@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить сотрудника</title>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">Главная</a></li>
+            <li><a href="/client">Клиенты</a></li>
+            <li><a href="/master">Сотрудники</a></li>
+            <li><a href="/service">Услуги</a></li>
+        </ul>
+    </nav>
+    <h1>Добавить сотрудника</h1>
+    <form action="/master" method="post" onsubmit="showAlert()">
+        <label for="full_name">ФИО</label>
+        <input type="text" id="full_name" name="full_name" required><br>
+        <label for="age">Возраст</label>
+        <input type="number" id="age" name="age" required><br>
+        <label for="phone">Телефон</label>
+        <input type="text" id="phone" name="phone" required><br>
+        <label for="exp">Стаж</label>
+        <input type="number" id="exp" name="exp" required><br>
+        <div id="services">
+            <!-- Радиокнопки для выбора услуг -->
+        </div><br>
+        <button type="submit">Добавить</button>
+    </form>
+
+    <script>
+        window.onload = () => {
+            fetch('/admin/services')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Ошибка при загрузке данных');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const servicesDiv = document.getElementById('services');
+                    data.forEach(service => {
+                        const radio = document.createElement('input');
+                        radio.type = 'radio';
+                        radio.name = 'services';
+                        radio.value = service.name; // Теперь передаем название услуги
+
+                        const label = document.createElement('label');
+                        label.textContent = `${service.name} (${service.cost} рублей)`;
+
+                        const br = document.createElement('br');
+
+                        servicesDiv.appendChild(radio);
+                        servicesDiv.appendChild(label);
+                        servicesDiv.appendChild(br);
+                    });
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Ошибка при загрузке данных об услугах');
+                });
+        };
+
+        const showAlert = () => {
+            alert("Сотрудник успешно добавлен!");
+        };
+    </script>
+
+</body>
+</html>

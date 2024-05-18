@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора</title>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">Главная</a></li>
+            <li><a href="/client">Клиенты</a></li>
+            <li><a href="/master">Сотрудники</a></li>
+            <li><a href="/service">Услуги</a></li>
+        </ul>
+    </nav>
+    <h1>Панель администратора</h1>
+    <div>
+        <h2>Выберите парикмахера:</h2>
+        <select id="masterSelect" onchange="displayMasterName()">
+            <option value="">Выберите парикмахера</option>
+        </select>
+        <p id="masterName"></p>
+    </div>
+
+    <script>
+        fetch('/admin/masters')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('masterSelect');
+                data.forEach(master => {
+                    const option = document.createElement('option');
+                    option.value = master.id; // Предполагается, что id будет уникальным
+                    option.textContent = master.full_name; // Имя парикмахера
+                    select.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Ошибка:', error));
+        function displayMasterName() {
+            const select = document.getElementById('masterSelect');
+            const selectedMasterId = select.value;
+
+            if (selectedMasterId) {
+                fetch(`/admin/masters/${selectedMasterId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('masterName').textContent = `Имя мастера: ${data.full_name}, возраст: ${data.age}, номер телефона: ${data.phone}, стаж работы: ${data.exp}, услуги: ${data.services}`;
+                    })
+                    .catch(error => console.error('Ошибка:', error));
+            } else {
+                document.getElementById('masterName').textContent = '';
+            }
+    }
+    </script>
+</body>
+</html>

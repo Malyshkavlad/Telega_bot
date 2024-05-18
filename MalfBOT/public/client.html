@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить клиента</title>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">Главная</a></li>
+            <li><a href="/client">Клиенты</a></li>
+            <li><a href="/master">Сотрудники</a></li>
+            <li><a href="/service">Услуги</a></li>
+        </ul>
+    </nav>
+    <h1>Добавить клиента</h1>
+    <form action="/client" method="post" onsubmit="showAlert()">
+        <label for="full_name">ФИО</label>
+        <input type="text" id="full_name" name="full_name" required><br>
+        <label for="phone">Телефон</label>
+        <input type="text" id="phone" name="phone" required><br>
+        <label for="feature">Особенности</label>
+        <textarea id="feature" name="feature" required></textarea><br>
+        <button type="submit">Добавить</button>
+    </form>
+    <script>
+        const showAlert = () => {
+            alert("Клиент успешно добавлен!");
+        };
+    </script>
+</body>
+</html>
