@@ -104,6 +104,24 @@ app.get('/admin/masters/:id', (req, res) => {
     });
 });
 
+app.get('/schedule/:master_id/:date', (req, res) => {
+    const { master_id, date } = req.params;
+    const sql = `
+        SELECT client.full_name, client.phone, client.feature, appointments.time
+        FROM appointments
+        JOIN client ON appointments.client_id = client.id
+        WHERE appointments.master_id = ? AND appointments.date = ?
+        ORDER BY appointments.time
+    `;
+    
+    db.all(sql, [master_id, date], (err, rows) => {
+        if (err) {
+            return console.error(err.message);
+        }
+        res.json(rows); // Send the master's schedule for the specified date in JSON format
+    });
+});
+
 app.get('/master', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/master.html'));
 });
@@ -125,8 +143,6 @@ app.get('/admin/services', (req, res) => {
         res.json(rows); // Отправляем данные о услугах в формате JSON
     });
 });
-
-
 
 
 
