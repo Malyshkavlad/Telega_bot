@@ -26,8 +26,7 @@ const db = new sqlite3.Database('./Admin.db', (err) => {
         )`);
         db.run(`CREATE TABLE IF NOT EXISTS services (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            cost INTEGER NOT NULL
+            name TEXT NOT NULL
         )`);
         db.run(`CREATE TABLE IF NOT EXISTS appointments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -66,8 +65,8 @@ app.post('/master', (req, res) => {
 });
 
 app.post('/service', (req, res) => {
-    const { name, cost } = req.body;
-    db.run("INSERT INTO services (name, cost) VALUES (?, ?)", [name, cost], (err) => {
+    const { name } = req.body;
+    db.run("INSERT INTO services (name) VALUES (?)", [name], (err) => {
         if (err) {
             return console.error(err.message);
         }
@@ -193,6 +192,15 @@ app.get('/schedule/:master_id/:date', (req, res) => {
             return console.error(err.message);
         }
         res.json(rows); // Отправляем расписание мастера на заданный день в формате JSON
+    });
+});
+app.delete('/admin/masters/:id', (req, res) => {
+    const masterId = req.params.id;
+    db.run("DELETE FROM master WHERE id = ?", [masterId], (err) => {
+        if (err) {
+            return console.error(err.message);
+        }
+        res.sendStatus(200); // Отправляем успешный статус
     });
 });
 //
